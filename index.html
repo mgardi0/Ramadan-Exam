@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no">
+    <title>پێشبڕکێی کۆلێژی پەروەردە</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-purple: #7a28cb;
+            --primary-blue: #00d2ff;
+            --danger-red: #ff3333;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #f0f4f8;
+            --transition-smooth: opacity 0.3s ease;
+        }
+
+        html { -webkit-text-size-adjust: 100%; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Kufi Arabic', sans-serif; }
+
+        body {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100%;
+            background-color: #0a0a0a;
+            color: var(--text-light);
+            overflow: hidden;
+            overscroll-behavior: none;
+            touch-action: none; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .animated-bg {
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(122, 40, 203, 0.4), transparent 60%),
+                        radial-gradient(circle at 80% 20%, rgba(0, 210, 255, 0.4), transparent 50%);
+            animation: moveGradient 15s infinite alternate ease-in-out;
+            z-index: -1; filter: blur(60px);
+        }
+
+        @keyframes moveGradient {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(5%, 10%); }
+            100% { transform: translate(-5%, -5%); }
+        }
+
+        .screen {
+            position: absolute; 
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; transition: var(--transition-smooth);
+            padding: 15px;
+        }
+
+        .screen.active { opacity: 1; visibility: visible; }
+
+        .glass-card {
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 30px 20px;
+            width: 92%; max-width: 420px; 
+            height: 520px; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center; display: flex; flex-direction: column; justify-content: flex-start;
+            position: relative;
+        }
+
+        .glass-card::-webkit-scrollbar { width: 6px; }
+        .glass-card::-webkit-scrollbar-track { background: transparent; }
+        .glass-card::-webkit-scrollbar-thumb { background: rgba(122, 40, 203, 0.5); border-radius: 10px; }
+
+        .logo { width: 80px; height: auto; margin: 0 auto 10px auto; border-radius: 15px; flex-shrink: 0; }
+
+        h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 15px; line-height: 1.6; background: linear-gradient(to right, #fff, #a3c2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; }
+        p { font-size: 0.9rem; margin-bottom: 15px; color: #d1d5db; line-height: 1.6;}
+
+        .input-group { margin-bottom: 15px; text-align: right; width: 100%; flex-shrink: 0; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 0.85rem; color: #a3c2ff; }
+        
+        input[type="text"] {
+            width: 100%; padding: 12px 15px; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);
+            color: white; font-size: 16px !important; -webkit-appearance: none;
+            outline: none; transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus { border-color: var(--primary-blue); background: rgba(0, 0, 0, 0.4); }
+
+        .error-msg { color: var(--danger-red); font-size: 0.8rem; margin-top: 5px; display: none; }
+
+        .custom-select-wrapper { position: relative; width: 100%; }
+        .custom-select-trigger {
+            width: 100%; padding: 12px 15px; border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(0, 0, 0, 0.2);
+            color: white; font-size: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+        }
+        .custom-options {
+            position: absolute; top: 100%; left: 0; right: 0; background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px); border: 1px solid var(--glass-border); border-radius: 12px;
+            margin-top: 8px; opacity: 0; visibility: hidden; pointer-events: none; transition: all 0.3s ease;
+            max-height: 180px; overflow-y: auto; z-index: 10; text-align: right;
+        }
+        .custom-select-wrapper.open .custom-options { opacity: 1; visibility: visible; pointer-events: auto; }
+        .custom-option { padding: 10px 15px; cursor: pointer; font-size: 15px; }
+        .custom-option:hover { background: rgba(122, 40, 203, 0.4); }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue));
+            border: none; border-radius: 12px; padding: 12px 20px; color: white;
+            font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: auto; transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .btn:hover { box-shadow: 0 4px 20px rgba(0, 210, 255, 0.3); }
+
+        .countdown-text { font-size: 8rem; font-weight: 800; background: linear-gradient(to right, #fff, var(--primary-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; width: 100%; flex-shrink: 0; }
+        
+        .timer-circle {
+            width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--primary-blue);
+            display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.1rem;
+            color: var(--primary-blue); transition: all 0.3s;
+        }
+        .timer-danger { border-color: var(--danger-red); color: var(--danger-red); transform: scale(1.1); animation: pulse 1s infinite; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        .question-text { font-size: 1.05rem; margin-bottom: 15px; line-height: 1.7; text-align: right; width: 100%; flex-shrink: 0; }
+        .options-container { width: 100%; flex-grow: 1; }
+        
+        .option-btn {
+            background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px; padding: 12px 15px; width: 100%; text-align: right; color: white;
+            font-size: 14px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s ease;
+        }
+        .option-btn:hover { background: rgba(122, 40, 203, 0.2); border-color: var(--primary-purple); }
+        .option-btn.selected { background: rgba(122, 40, 203, 0.5); border-color: var(--primary-blue); }
+
+        .loader {
+            border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--primary-blue);
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop preload="auto">
+        <source src="Tick-Tock(MP3_320K).mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="animated-bg"></div>
+
+    <div id="screen-welcome" class="screen active">
+        <div class="glass-card" style="justify-content: center;">
+            <img src="salahaddin-education-logo.png" alt="لۆگۆی کۆلێژ" class="logo" onerror="this.style.display='none'">
+            <h1>بەخێربێی بۆ پێشبڕکێی پرسیارو وەڵامی کۆلێژی پەروەردە</h1>
+        </div>
+    </div>
+
+    <div id="screen-form" class="screen">
+        <div class="glass-card">
+            <img src="salahaddin-education-logo.png" alt="لۆگۆی کۆلێژ" class="logo" onerror="this.style.display='none'">
+            <h2>زانیارییەکانت تۆمار بکە</h2>
+            
+            <div class="input-group">
+                <label>ناوی سیانیت بنووسە:</label>
+                <input type="text" id="fullName" placeholder="بۆ نموونە: محمد سەرکەوت حسین" autocomplete="off">
+                <div id="nameError" class="error-msg">تکایە تەنها پیتی کوردی/عەرەبی بنووسە و لە سێ ناو کەمتر نەبێت</div>
+            </div>
+
+            <div class="input-group">
+                <label>لە چ بەشێکی؟</label>
+                <div class="custom-select-wrapper" id="departmentSelect">
+                    <div class="custom-select-trigger"><span id="selectedDepartment">بەشەکەت هەڵبژێرە...</span><span>▼</span></div>
+                    <div class="custom-options">
+                        <div class="custom-option">بایۆلۆجی</div><div class="custom-option">کیمیا</div>
+                        <div class="custom-option">فیزیا</div><div class="custom-option">ماتماتیک</div>
+                        <div class="custom-option">ڕێنمایی پەروەردەیی و دەروونی</div><div class="custom-option">پەروەردەی تایبەت</div>
+                        <div class="custom-option">ئینگلیزی</div><div class="custom-option">عەرەبی</div>
+                        <div class="custom-option">کوردی</div><div class="custom-option">سریانی</div>
+                    </div>
+                </div>
+                <div id="deptError" class="error-msg">تکایە بەشەکەت هەڵبژێرە</div>
+            </div>
+
+            <button class="btn" id="startBtn">با دەست پێبکەین</button>
+        </div>
+    </div>
+
+    <div id="screen-countdown" class="screen"><div class="countdown-text" id="countdownTimer">3</div></div>
+
+    <div id="screen-quiz" class="screen">
+        <div class="glass-card">
+            <div class="quiz-header">
+                <div class="timer-circle" id="questionTimer">30</div>
+                <div style="text-align: right;">
+                    <div style="color: var(--primary-blue); font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;" id="questionCounter">پرسیاری 1 / 20</div>
+                    <div id="displayUserName" style="color: #ccc; font-size: 0.8rem;">ناو</div>
+                </div>
+            </div>
+            <div class="question-text" id="questionText">دەقی پرسیار</div>
+            <div class="options-container" id="optionsContainer"></div>
+        </div>
+    </div>
+
+    <div id="screen-result" class="screen">
+        <div class="glass-card" style="justify-content: center;">
+            <div id="loadingBox" style="display: none;">
+                <div class="loader"></div>
+                <p>چاوەڕێبە، ئەنجامەکەت دەنێردرێت...</p>
+            </div>
+            <div id="finalMessageBox">
+                <h2 id="finalMessage" style="line-height: 1.6;"></h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // لینکی نوێی گۆوگڵ شیتەکە
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbyMsICqKF1x1jgRASERFa9W4Bz55IKI8QnUSca6Tdb4_3-dztgBvqr2Ja62amhYyUSx/exec";
+        const bgMusic = document.getElementById('bgMusic');
+
+        // لیستی پرسیارە نوێیەکان
+        const questions = [
+            { q: "کامیان لەم هۆکارانە بەرپرسە لە گواستنەوەی نیشانە دەمارەییەکان لە نێوان دوو دەمارەخانەدا لە ڕێگەی 'Synapse'؟", options: ["A) پۆتاسیۆم", "B) ترشی ئەمینی", "C) گواستەرە دەمارەییەکان (Neurotransmitters)", "D) هۆرمۆنی ئەدریناڵین"], answer: 2 },
+            { q: "لە کارلێکی گەرمیمژدا (Endothermic)، گۆڕانی گەرمی (ΔH) چۆنە؟", options: ["A) سفرە", "B) نەرێنییە (کەمتر لە سفر)", "C) ئەرێنییە (زیاتر لە سفر)", "D) پەیوەندی بە پلەی گەرمییەوە نییە"], answer: 2 },
+            { q: "ئەگەر دووری نێوان دوو تەنی خاوەن بارستە دوو هێندە بکرێت، هێزی کێشکردنی نێوانیان چی لێ دێت؟", options: ["A) دوو هێندە زیاد دەکات", "B) نیوە دەبێتەوە", "C) چوار هێندە کەم دەبێتەوە", "D) وەک خۆی دەمێنێتەوە"], answer: 2 },
+            { q: "ئەنجامی تەواوکاری ∫(2x + 3) dx یەکسانە بە چی؟", options: ["A) x² + 3x + C", "B) 2x² + 3 + C", "C) x² + C", "D) 2x + C"], answer: 0 },
+            { q: "کامیان نیشانەیەکی سەرەکییە بۆ دیاریکردنی حاڵەتی 'دیسلێکسیا' (Dyslexia) لە منداڵدا؟", options: ["A) کێشە لە کۆنتڕۆڵکردنی جووڵە", "B) زەحمەتی لە ناسینەوەی پیت و خوێندنەوەی وشەکان", "C) تێکچوونی باری دەروونی و دوورەپەرێزی", "D) لاوازی لە بینین و بیستن"], answer: 1 },
+            { q: "لە تیۆری 'بندورا'دا بۆ فێربوونی کۆمەڵایەتی، چەمکی سەرەکی چییە بۆ گۆڕینی ڕەفتار؟", options: ["A) سزا و پاداشتی ماددی", "B) مۆدێلینگ و چاو لێکردن (Modeling)", "C) گەڕانەوە بۆ بیرەوەرییە کۆنەکان", "D) تەنها هاندانی جەستەیی"], answer: 1 },
+            { q: "Identify the correct conditional structure: 'If she ______ harder, she would have passed the exam.'", options: ["A) studies", "B) studied", "C) had studied", "D) has studied"], answer: 2 },
+            { q: "ما هو إعراب کلمة (الطالبُ) في جملة 'ظننتُ الطالبَ ناجحاً'؟", options: ["A) فاعل مرفوع", "B) مفعول به أول منصوب", "C) مفعول به ثان منصوب", "D) مبتدأ مؤخر"], answer: 1 },
+            { q: "لە ڕستەی 'شەو بێدەنگ بوو'، وشەی (بێدەنگ) لە ڕووی پێکهاتەی وشەوە کام جۆرەیە؟", options: ["A) سادە", "B) دارێژراو", "C) لێکدراو", "D) پێوەبستراو"], answer: 1 },
+            { q: "پیتەکانی (ب، ج، د، ک، پ، ت) لە زمانی سریانیدا کە بە 'بگدکپت' ناسراون، چ کاتێک بە نەرمی (ڕوکاکا) دەخوێندرێنەوە؟", options: ["A) کاتێک لە سەرەتای وشە بن", "B) کاتێک پێشیان پیتی بێدەنگ بێت", "C) کاتێک بکەونە دوای پیتێکی بزوێن (Vowel)", "D) کاتێک نیشانەی جەختەیان لەسەر بێت"], answer: 2 },
+            { q: "لە کاتی دروستبوونی پڕۆتیندا (Translation)، ترشە ئەمینییەکان بە چ جۆرە بەستەرێک بە یەکەوە دەبەسترێنەوە؟", options: ["A) بەستەری هایدرۆجینی", "B) بەستەری پێپتایدی (Peptide bond)", "C) بەستەری ئایۆنی", "D) بەستەری کۆڤالێنت"], answer: 1 },
+            { q: "کام لەم ماددانەی خوارەوە بە 'ئەمفۆتێر' (Amphoteric) دادەنرێت؟", options: ["A) HCl", "B) NaOH", "C) H₂O", "D) NaCl"], answer: 2 },
+            { q: "بەپێی یاسای دووەمی تێرمۆداینامیک، 'ئینترۆپی' (Entropy) لە گەردووندا بەردەوام چی لێ دێت؟", options: ["A) کەم دەکات", "B) زیاد دەکات", "C) وەک خۆی دەمێنێتەوە", "D) دەبێتە سفر"], answer: 1 },
+            { q: "لاری هێڵی ڕاست (Slope) کە بە هەردوو خاڵی (2, 5) و (4, 9) تێدەپەڕێت چەندە؟", options: ["A) 1", "B) 3", "C) 2", "D) 4"], answer: 2 },
+            { q: "ستراتیژی 'IEP' لە پەروەردەی تایبەتدا بۆ چ مەبەستێک بەکاردێت؟", options: ["A) بۆ گۆڕینی کتێبە خوێندنەکان", "B) بۆ داڕشتنی بەرنامەیەکی فێربوونی تاکەکەسی بۆ خوێندکار", "C) بۆ دیاریکردنی تێچووی قوتابخانە", "D) بۆ هەڵبژاردنی بەڕێوەبەری قوتابخانە"], answer: 1 },
+            { q: "بە شێوازی چارەسەری 'عەقڵانی-سۆزداری' (REBT)، سەرچاوەی سەرەکی تێکچوونی دەروونی بۆ چی دەگەڕێتەوە؟", options: ["A) ڕووداوە دەرەکییەکان بە تەنیا", "B) جەینیتیک و بۆماوەیی", "C) بیروباوەڕە ناعەقڵانییەکانی خودی کەسەکە", "D) نەبوونی پارەی پێویست"], answer: 2 },
+            { q: "Which of the following is a 'Gerund' in this sentence: 'Walking is a good exercise for health.'", options: ["A) exercise", "B) good", "C) health", "D) Walking"], answer: 3 },
+            { q: "ما هو جمع التكسير للكلمة (مِصباح)؟", options: ["A) مصباحون", "B) مصباحات", "C) مصابيح", "D) مِصباحين"], answer: 2 },
+            { q: "لە ڕستەی 'گوڵەکە بۆنخۆشە'، ئەرکی ڕێزمانیی وشەی (بۆنخۆش) چییە؟", options: ["A) بکەر", "B) تەواوکەری لێکدراو (هەواڵ)", "C) کار (فێڵ)", "D) جێناو"], answer: 1 },
+            { q: "زمانی سریانی سەر بە کام خێزانی زمانەوانییە؟", options: ["A) زمانە هیندۆئەوروپییەکان", "B) زمانە جێرمەنییەکان", "C) زمانە سامییەکان", "D) زمانە ئاڵتاییەکان"], answer: 2 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timerInterval;
+        let isQuizActive = false;
+        let userName = "";
+        let userDept = "";
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        if(localStorage.getItem('koleji_quiz_completed') === 'true') {
+            document.getElementById('finalMessage').textContent = "تازە بەژداریت نەکرد گوڵەباخ😏";
+            document.getElementById('finalMessage').style.color = "var(--danger-red)";
+            showScreen('screen-result');
+        } else {
+            setTimeout(() => { showScreen('screen-form'); }, 3000);
+        }
+
+        const selectWrapper = document.getElementById('departmentSelect');
+        const selectedText = document.getElementById('selectedDepartment');
+        document.querySelector('.custom-select-trigger').addEventListener('click', () => selectWrapper.classList.toggle('open'));
+        document.querySelectorAll('.custom-option').forEach(opt => {
+            opt.addEventListener('click', function() {
+                selectedText.textContent = this.textContent;
+                selectedText.style.color = "white";
+                selectWrapper.classList.remove('open');
+                document.getElementById('deptError').style.display = 'none';
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            const nameInput = document.getElementById('fullName').value.trim();
+            const deptInput = selectedText.textContent;
+            
+            const kurdishArabicRegex = /^[\u0600-\u06FF\u0750-\u077F\s]+$/;
+            const wordsCount = nameInput.split(/\s+/).length;
+
+            let hasError = false;
+
+            if (!kurdishArabicRegex.test(nameInput) || wordsCount < 3) {
+                document.getElementById('nameError').style.display = 'block';
+                hasError = true;
+            } else {
+                document.getElementById('nameError').style.display = 'none';
+            }
+
+            if (deptInput === "بەشەکەت هەڵبژێرە...") {
+                document.getElementById('deptError').style.display = 'block';
+                hasError = true;
+            }
+
+            if (hasError) return;
+
+            userName = nameInput;
+            userDept = deptInput;
+            document.getElementById('displayUserName').textContent = userName;
+
+            localStorage.setItem('koleji_quiz_completed', 'true');
+
+            showScreen('screen-countdown');
+            let count = 3;
+            document.getElementById('countdownTimer').textContent = count;
+            let countInterval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    document.getElementById('countdownTimer').textContent = count;
+                } else {
+                    clearInterval(countInterval);
+                    startQuiz();
+                }
+            }, 1000);
+        });
+
+        function startQuiz() {
+            isQuizActive = true;
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            // پێکردنی میوزیک
+            bgMusic.play().catch(e => console.log("کێشە لە لێدانی میوزیک:", e));
+            
+            showScreen('screen-quiz');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if(currentQuestionIndex >= questions.length) {
+                endQuiz("سوپاس بۆ بەژداریکردنت گوڵەباخ چاوەڕوانبە تاکو ئەنجامەکان ڕادەگەیەنرێت");
+                return;
+            }
+
+            const q = questions[currentQuestionIndex];
+            document.getElementById('questionCounter').textContent = `پرسیاری ${currentQuestionIndex + 1} / 20`;
+            document.getElementById('questionText').textContent = q.q;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = "";
+
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            let timeLeft = 30; // کاتەکە کرا بە 30 چرکە
+            const timerEl = document.getElementById('questionTimer');
+            timerEl.textContent = timeLeft;
+            timerEl.classList.remove('timer-danger');
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = timeLeft;
+                if(timeLeft <= 5) timerEl.classList.add('timer-danger'); // لە 5 چرکە سور دەبێتەوە
+                
+                if(timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    // کەمکردنەوەی نمرە بە مەرجی ئەوەی لە سفر کەمتر نەبێت
+                    if(score > 0) score -= 1;
+                    timeOutNextQuestion();
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedIndex, btn) {
+            clearInterval(timerInterval);
+            const correctIndex = questions[currentQuestionIndex].answer;
+            const allBtns = document.querySelectorAll('.option-btn');
+            
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+            btn.classList.add('selected');
+
+            if(selectedIndex === correctIndex) {
+                score += 1;
+            } else {
+                // کەمکردنەوەی نمرە بە مەرجی ئەوەی لە سفر کەمتر نەبێت
+                if(score > 0) score -= 1;
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 800);
+        }
+
+        function timeOutNextQuestion() {
+            const allBtns = document.querySelectorAll('.option-btn');
+            allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 800);
+        }
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && isQuizActive) {
+                triggerCheat("بەتەمای قۆپیە بکەی گوڵەباخ😏");
+            }
+        });
+
+        window.addEventListener("keyup", (e) => {
+            if ((e.key === 'PrintScreen' || e.key === 'Meta') && isQuizActive) {
+                triggerCheat("دەتەوێ لۆ برادەران بنێری😏");
+            }
+        });
+
+        function triggerCheat(message) {
+            isQuizActive = false;
+            clearInterval(timerInterval);
+            score = "'00"; // بۆ قۆپیە دوو سفر دەنێرێت کە وەک دەقە و ناچێتە لیستی یەکەمەکان
+            endQuiz(message, true);
+        }
+
+        function endQuiz(message, isCheater = false) {
+            isQuizActive = false;
+            
+            // وەستاندنی میوزیک
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            
+            showScreen('screen-result');
+            document.getElementById('loadingBox').style.display = 'block';
+            document.getElementById('finalMessageBox').style.display = 'none';
+
+            // دڵنیابوونەوە کە ئەگەر ژمارە بێت لە سفر کەمتر نییە پێش ناردن
+            let finalScore = (score === "'00") ? score : Math.max(0, score);
+
+            const payload = {
+                name: userName,
+                department: userDept,
+                score: finalScore
+            };
+
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(() => {
+                document.getElementById('loadingBox').style.display = 'none';
+                document.getElementById('finalMessageBox').style.display = 'block';
+                const msgEl = document.getElementById('finalMessage');
+                msgEl.textContent = message;
+                if(isCheater) msgEl.style.color = "var(--danger-red)";
+                else msgEl.style.color = "#2ecc71";
+            }).catch(err => {
+                console.error(err);
+                document.getElementById('loadingBox').style.display = 'none';
+                document.getElementById('finalMessage').textContent = "کێشەیەک هێلە هەیە لە ناردنی داتا، بەڵام تاقیکردنەوەکەت کۆتایی هات.";
+                document.getElementById('finalMessageBox').style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
