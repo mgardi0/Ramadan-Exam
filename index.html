@@ -264,7 +264,8 @@
             document.getElementById(screenId).classList.add('active');
         }
 
-        if(localStorage.getItem('koleji_quiz_completed') === 'true') {
+        // لێرەدا ناوەکەمان گۆڕی بۆ ڤێرژنی 2 بۆ ئەوەی بۆ هەمووان سفر ببێتەوە
+        if(localStorage.getItem('koleji_quiz_completed_v2') === 'true') {
             document.getElementById('finalMessage').textContent = "تازە بەژداریت نەکرد گوڵەباخ😏";
             document.getElementById('finalMessage').style.color = "var(--danger-red)";
             showScreen('screen-result');
@@ -311,7 +312,8 @@
             userDept = deptInput;
             document.getElementById('displayUserName').textContent = userName;
 
-            localStorage.setItem('koleji_quiz_completed', 'true');
+            // سەڤکردن بە ڤێرژنی 2
+            localStorage.setItem('koleji_quiz_completed_v2', 'true');
 
             showScreen('screen-countdown');
             let count = 3;
@@ -332,7 +334,6 @@
             currentQuestionIndex = 0;
             score = 0;
             
-            // پێکردنی میوزیک
             bgMusic.play().catch(e => console.log("کێشە لە لێدانی میوزیک:", e));
             
             showScreen('screen-quiz');
@@ -364,7 +365,7 @@
         }
 
         function startTimer() {
-            let timeLeft = 30; // کاتەکە کرا بە 30 چرکە
+            let timeLeft = 30; 
             const timerEl = document.getElementById('questionTimer');
             timerEl.textContent = timeLeft;
             timerEl.classList.remove('timer-danger');
@@ -373,11 +374,10 @@
             timerInterval = setInterval(() => {
                 timeLeft--;
                 timerEl.textContent = timeLeft;
-                if(timeLeft <= 5) timerEl.classList.add('timer-danger'); // لە 5 چرکە سور دەبێتەوە
+                if(timeLeft <= 5) timerEl.classList.add('timer-danger'); 
                 
                 if(timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    // کەمکردنەوەی نمرە بە مەرجی ئەوەی لە سفر کەمتر نەبێت
                     if(score > 0) score -= 1;
                     timeOutNextQuestion();
                 }
@@ -396,7 +396,6 @@
             if(selectedIndex === correctIndex) {
                 score += 1;
             } else {
-                // کەمکردنەوەی نمرە بە مەرجی ئەوەی لە سفر کەمتر نەبێت
                 if(score > 0) score -= 1;
             }
 
@@ -431,14 +430,13 @@
         function triggerCheat(message) {
             isQuizActive = false;
             clearInterval(timerInterval);
-            score = "'00"; // بۆ قۆپیە دوو سفر دەنێرێت کە وەک دەقە و ناچێتە لیستی یەکەمەکان
+            score = "'00"; 
             endQuiz(message, true);
         }
 
         function endQuiz(message, isCheater = false) {
             isQuizActive = false;
             
-            // وەستاندنی میوزیک
             bgMusic.pause();
             bgMusic.currentTime = 0;
             
@@ -446,7 +444,6 @@
             document.getElementById('loadingBox').style.display = 'block';
             document.getElementById('finalMessageBox').style.display = 'none';
 
-            // دڵنیابوونەوە کە ئەگەر ژمارە بێت لە سفر کەمتر نییە پێش ناردن
             let finalScore = (score === "'00") ? score : Math.max(0, score);
 
             const payload = {
